@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h1 class="mb-0">Mes produits</h1>
+                    {% if is_granted("ROLE_Magasinier") %}
+                    <a href="{{ path("product_create") }}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Créer un produit
+                    </a>
+                    {% endif %}
+                </div>
+                <table class="mb-0 table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Produit</th>
+                            <th class="text-center">Quantité disponible</th>
+                            <th class="text-center">Conditionnement</th>
+                            <th class="text-center">Type de produit</th>
+                            {% if is_granted("ROLE_Magasinier") %}
+                            <th class="text-center">Date de péremption</th>
+                            <th class="text-center">Date de fin d'approvisionnement</th>
+                            <th class="text-center">Fournisseur</th>
+                            <th class="text-center">Etagère</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                    <td class="text-center">{{ product.desPro }}</td>
+                                    <td class="text-center">{{ product.qteSt }}</td>
+                                    <td class="text-center">{{ product.condPro }}</td>
+                                    <td class="text-center">{{ product.typePro }}</td>
+                                    {% if is_granted("ROLE_Magasinier") %}
+                                    <td class="text-center">{{ product.datePer|date('d-m-Y') }}</td>
+                                    <td class="text-center">{{ product.dateFin|date('d-m-Y') }}</td>
+                                    <td class="text-center">{{ product.fournPro }}</td>
+                                    <td class="text-center">{{ product.position }}</td>
+                                <td class="text-center"><a href="{{ path("product_update", { id: product.refPro }) }}" class="btn btn-outline-primary">Modifier</a></td>
+                                {% endif %}
+                                {% if  product.dateFin|date('d-m-Y')  < "now"|date('d-m-Y')  %}
+                                <td class="text-center"><a href="{{ path("cart_add", { id: product.refPro }) }}" class="btn btn-primary btn-block">Ajouter au panier</a></td>
+                                {% else %}
+                                <td class="text-center"><a href="" class="btn btn-secondary">Produit non disponible</a></td>
+                                {% endif %}
+                            </tr>
+                        
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

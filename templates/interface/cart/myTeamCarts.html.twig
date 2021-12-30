@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h1 class="mb-0">Les paniers de mon équipe</h1>
+                </div>
+                <table class="mb-0 table table-striped ">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Numéro de panier</th>
+                        <th class="text-center">Utlisateur</th>
+                        <th class="text-center">Date de création</th>
+                        <th class="text-center">état de la commande</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for commande in commandes %}
+                        <tr>
+                            <td class="text-center">{{ commande.numCom }}</td>
+                            <td class="text-center">{{ commande.userId }}</td>
+                            <td class="text-center">{{ commande.dateCom|date('d-m-Y') }}</td>
+                            <th class="text-center">
+                                {% if  commande.stateCom  == 1 %} En attente de validation
+                                {% elseif  commande.stateCom  == 2 %} Validée
+                                {% elseif  commande.stateCom  == 3 %} En cours de traitement
+                                {% elseif  commande.stateCom  == 4 %} Livré
+                                {% elseif  commande.stateCom  == 5 %} Annulé{% endif %}</th>
+                            {% if is_granted("ROLE_TeamLeader") %}
+                            {% if  commande.stateCom  == 1 %}
+                                <td class="text-center"><a href="{{ path("cart_validate", { id: commande.numCom }) }}" class="btn btn-success">Valider</a></td>
+                            {% endif %}
+                            {% endif %}
+                            <td class"p-2 bd-highlight"><a href="{{ path("cart_load", { id: commande.numCom }) }}" class="btn btn-primary btn-block">Charger le panier</a></td>
+                        </tr>
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

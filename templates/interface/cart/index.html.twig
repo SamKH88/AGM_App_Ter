@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="mb-0">Mon panier</h1>
+                </div>
+                <table class="mb-0 table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Produit</th>
+                            <th class="text-center">Quantité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td class="text-center">{{ item.produit.desPro }}</td>
+                            <td class="text-center">{{ item.qtePro }}</td>
+                            <td>
+                                <a href="{{ path('cart_increment',{'id':item.produit.refPro}) }}" class="btn btn-info">
+                                    +
+                                </a>
+                                <a href="{{ path('cart_decrement',{'id':item.produit.refPro}) }}" class="btn btn-info">
+                                    -
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('cart_remove', {'id':item.produit.refPro})}}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="card-footer">
+                    <a href="{{ path('cart_submit') }}" class="btn btn-block btn-primary">Soumettre</a>
+                    <a href="{{ path('cart_save') }}" class="btn btn-block btn-primary">Sauvegarder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
