@@ -8,4 +8,52 @@
 
 </div>
 
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                <img src="{{ asset('/images/cart.png')}}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="Gestion des paniers">Gestion des paniers</h5>
+                    <p class="card-text">Gérer ses paniers pour émettre des commandes.</p>
+                    {% if is_granted("ROLE_Utilisateur") %}
+                    <a href="{{ path("cart_index") }}" class="btn btn-outline-light">Mon panier</a>
+                    <a href="{{ path("cart_carts") }}" class="btn btn-outline-light">Mes paniers sauvegardés</a>
+                    {% endif %}
+                 </div>
+             </div>
+        </div>
+        <div class="col-md-4">
+
+            <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                <img src="{{ asset('/images/order.png')}}" class="card-img-top" alt="...">
+                 <div class="card-body">
+                    <h5 class="Gestion des commandes">Gestion des commandes</h5>
+                     <p class="card-text">Consulter ou valider les commandes. </p>
+                     {% if is_granted("ROLE_Utilisateur") %}
+                     <a href="{{ path("cart_team_carts") }}" class="btn btn-outline-light">Les commandes de mon équipe</a>
+                     {% if is_granted("ROLE_Magasinier") %}
+                     <a href="{{ path("cart_process") }}" class="btn btn-outline-light">Les commandes à traiter</a>
+                     {% endif %}
+                     {% endif %}
+                </div>
+            </div>
+        </div>
+
+            <div class="col-md-4">
+                <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                    <img src="{{ asset('/images/product.png')}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="Gestion des stocks">Gestion des stocks</h5>
+                        <p class="card-text">Gérer les entrées et sorties de stocks.</p>
+                        {% if is_granted("ROLE_Utilisateur") %}
+                        <a href="{{ path("product_index") }}" class="btn btn-outline-light">Les produits</a>
+                        {% if is_granted("ROLE_Magasinier") %}
+                        <a href="{{ path("product_create") }}" class="btn btn-outline-light">Ajout d'un nouveau produit</a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
 {% endblock %}

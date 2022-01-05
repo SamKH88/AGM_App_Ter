@@ -31,15 +31,16 @@ class OrderController extends AbstractController
      * @IsGRanted("ROLE_TeamLeader")
      * @Route("/validate/{id}", name="cart_validate")
      */
-    public function validate($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository){
+    public function validate($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository)
+    {
 
         $entityManager = $doctrine->getManager();
-        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom'=>$id]);
+        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom' => $id]);
         $order->setStateCom(2);
         $entityManager->flush();
 
-        $this->addFlash("succes","la commande a bien été validé");
-        return $this-> redirectToRoute("cart_team_carts");
+        $this->addFlash("succes", "la commande a bien été validé");
+        return $this->redirectToRoute("cart_team_carts");
     }
 
     /**
@@ -47,52 +48,85 @@ class OrderController extends AbstractController
      * @IsGRanted("ROLE_Magasinier")
      * @Route("/process", name="cart_process")
      */
-    public function process(ManagerRegistry $doctrine, Request $request, CommandeRepository $commandeRepository){
+    public function process(ManagerRegistry $doctrine, Request $request, CommandeRepository $commandeRepository)
+    {
 
-        $commandes_=[];
-        $commandes=[];
-            $commandes_ = $commandeRepository->findBy([],['stateCom' =>'ASC']);
-            foreach ($commandes_ as $id_) {
-                if ($id_->getStateCom() > 1)
-                    array_push($commandes,$id_);
-            }
+        $commandes_ = [];
+        $commandes = [];
+        $commandes_ = $commandeRepository->findBy([], ['stateCom' => 'ASC']);
+        foreach ($commandes_ as $id_) {
+            if ($id_->getStateCom() > 1)
+                array_push($commandes, $id_);
+        }
 
 
         return $this->render("interface/cart/cartsToProcess.html.twig", [
             "commandes" => $commandes
         ]);
     }
+
     /**
      * @param $id
      * @return RedirectResponse
      * @IsGRanted("ROLE_Magasinier")
      * @Route("/deliver/{id}", name="cart_deliver")
      */
-    public function deliver($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository){
+    public function deliver($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository)
+    {
 
         $entityManager = $doctrine->getManager();
-        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom'=>$id]);
+        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom' => $id]);
         $order->setStateCom(3);
         $entityManager->flush();
 
-        $this->addFlash("succes","la commande a bien été traité");
-        return $this-> redirectToRoute("cart_process");
+        $this->addFlash("succes", "la commande a bien été traité");
+        return $this->redirectToRoute("cart_process");
     }
+
     /**
      * @param $id
      * @return RedirectResponse
      * @IsGRanted("ROLE_Magasinier")
      * @Route("/delivered/{id}", name="cart_delivered")
      */
-    public function delivered($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository){
+    public function delivered($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository, ProduitRepository $produitRepository)
+    {
 
         $entityManager = $doctrine->getManager();
-        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom'=>$id]);
-        $order->setStateCom(4);
-        $entityManager->flush();
+        $entityManager_ = $doctrine->getManager();
+        $panier = $panierRepository->findBy(['numCom' => $id]);
+        $order = $entityManager_->getRepository(Commande::class)->findOneBy(['numCom' => $id]);
+        $success=0;
+        foreach ($panier as $id_)
+        {
+            if($produitRepository->findOneBy(['refPro'=>$id_->getRefPro()])->getQteSt() >= $id_->getQtePro()){
 
-        $this->addFlash("succes","La commande a bien été livré");
-        return $this-> redirectToRoute("cart_process");
+                $produit = $entityManager->getRepository(produit::class)->findOneBy(['refPro' => $id_->getRefPro()]);
+                $produit->setQteSt($produit->getQteSt() - $id_->getQtePro());
+            }
+            else{
+                $success=1;
+            }
+        }
+        if( $order->getStateCom()!=3)
+            $success=2;
+
+        if($success ==0)
+        {
+            $entityManager->flush();
+            $order->setStateCom(4);
+            $entityManager_->flush();
+            $this->addFlash("succes", "La commande a bien été livré");
+        }
+        elseif ($success ==1) {
+            $this->addFlash("failure", "Stock insuffisant pour satisfaire la commande");
+        }
+        else{
+            $this->addFlash("failure", "Cette commande n'est pas en cours de traitement");
+        }
+
+
+        return $this->redirectToRoute("cart_process");
     }
 
     /**
@@ -101,19 +135,81 @@ class OrderController extends AbstractController
      * @IsGRanted("ROLE_Magasinier")
      * @Route("/cancel/{id}", name="cart_cancel")
      */
-    public function cancel($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository){
+    public function cancel($id, ManagerRegistry $doctrine, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository)
+    {
 
         $entityManager = $doctrine->getManager();
-        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom'=>$id]);
+        $order = $entityManager->getRepository(Commande::class)->findOneBy(['numCom' => $id]);
         $order->setStateCom(5);
         $entityManager->flush();
 
-        $this->addFlash("succes","La commande a bien été annulé");
-        return $this-> redirectToRoute("cart_process");
+        $this->addFlash("succes", "La commande a bien été annulé");
+        return $this->redirectToRoute("cart_process");
+    }
+
+
+    /**
+     * @param $id
+     * @return RedirectResponse
+     * @IsGRanted("ROLE_Magasinier")
+     * @Route("/details/{id}", name="order_details")
+     */
+    public function details($id, Request $request, PanierRepository $panierRepository, CommandeRepository $commandeRepository, UtilisateurRepository $utilisateurRepository)
+    {
+
+        $session = $request->getSession();
+
+
+        $produits = $panierRepository->findBy(['numCom' => $id]);
+        $user = $utilisateurRepository->findOneBy(['userId' => $commandeRepository->findOneBy(['numCom' => $id])->getUserId()]);
+
+        $paniers = [];
+        $paniers[0] = $user;
+
+        foreach ($produits as $id_) {
+            $produit = $id_->getRefPro();
+            $paniers[$produit] = $id_;
+        }
+
+        $session->set('panier', $paniers);
+        return $this->redirectToRoute("order_display");
+
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     * @IsGRanted("ROLE_Magasinier")
+     * @Route("/display", name="order_display")
+     */
+    public function display(Request $request, ProduitRepository $produitRepository): Response
+    {
+
+        $session = $request->getSession();
+        $panier = $session->get('panier',[]);
+
+
+        $panierComplet = [];
+        $panierComplet[0]=$panier[0];
+
+
+        foreach($panier as $id => $quantity) {
+            if ($id != 0) {
+                $panierComplet[] = [
+                    'produit' => $id,
+                    'qtePro' => $quantity->getQtePro()
+                ];
+            }
+
+        }
+
+        return $this->render('interface/cart/cartDetails.html.twig', ['items'=> $panierComplet] );
+
     }
 
 
 }
+
 
 
 

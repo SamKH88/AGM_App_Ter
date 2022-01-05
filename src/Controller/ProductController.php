@@ -77,12 +77,17 @@ class ProductController extends AbstractController
         $form = $this->createForm(ProductUpdateType::class, $product)->handlerequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
-            if($product->getQteSt()!=null)
-            $product_->setQteSt($product->getQteSt());
-            if($product->getDateFin()!=null)
-            $product_->setDateFin($product->getDateFin());
-            $entityManager->flush();
-            $this->addFlash("success","Le produit a bien été mis à jour ");
+            if( $product->getQteSt()>=0) {
+                $product_->setQteSt($product->getQteSt() + $product_->getQteSt());
+                if ($product->getDateFin() != null)
+                    $product_->setDateFin($product->getDateFin());
+                $entityManager->flush();
+                $this->addFlash("success", "Le produit a bien été mis à jour ");
+            }
+            else{
+                $this->addFlash("failure", "Quantité erronée");
+
+            }
             return $this->redirectToRoute("product_index");
 
 

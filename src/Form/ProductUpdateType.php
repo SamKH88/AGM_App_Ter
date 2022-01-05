@@ -25,7 +25,7 @@ class ProductUpdateType extends AbstractType
     {
         $builder
 
-            ->add("qteSt", NumberType::class, ["label" => "Quantité disponible en stock","empty_data" => ""])
+            ->add("qteSt", NumberType::class, ["label" => "Quantité ajoutée en stock","empty_data" => ""])
             ->add("dateFin", DateType::class, ["label" => "Date de fin de disponibilité","empty_data" => ""]);
     }
 

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="mb-0">Détails de la commande</h1>
+                </div>
+                <table class="mb-0 table table-striped">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Réf Produit</th>
+                        <th class="text-center">Quantité</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in 1..items|length-1 %}
+                        <tr>
+                            <td class="text-center">{{ items[i].produit }}</td>
+                            <td class="text-center">{{ items[i].qtePro }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="card-footer">
+                    <div><td class="text-center"><p class="fw-bold">Utilisateur numéro :  {{ items[0].userId }}</p></td></div>
+                    <div><td class="text-center"><p class="fw-bold">Localisation: Immeuble : {{ items[0].userLocImb }} -- étage {{ items[0].userLocEtage }} -- porte {{ items[0].userLocPorte }}</p></td></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
